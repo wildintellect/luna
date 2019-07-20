@@ -1,10 +1,12 @@
-.Rhistory
-.o
-.so
-.exe
-.R~
-.dll
-.zip
+*.tar.gz
+*Rcheck/
+*.o
+*.so
+*.exe
+*.Rhistory
+*.R~
+*.dll
+*.zip
 .Rapp.history
 .RData
 *-Ex.R
@@ -19,3 +21,4 @@ vignettes/*.pdf
 *.utf8.md
 *.knit.md
 rsconnect/
+.Rproj.user
