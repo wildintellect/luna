@@ -69,8 +69,38 @@ find_aws <- function(scene = "LC08_L1TP_167056_20190517_20190521_01_T1"){
   )
 }
 
-# 'https://earthexplorer.usgs.gov/download/external/options/LANDSAT_8_C1/LC81690562019135LGN00/INVSVC/'
-#url <- 'https://earthexplorer.usgs.gov/download/12864/LC81690562019135LGN00/STANDARD/INVSVC'
-#outpath <- "LC81690562019135LGN00.tif"
-#usgs <- httr::GET(url, httr::authenticate(USERNAME, PASSWORD), progress(), httr::write_disk(outpath))
-# https://dds.cr.usgs.gov/ltaauth/hsm/lsat1/collection01/oli_tirs/T1/2019/167/056/LC08_L1TP_167056_20190517_20190521_01_T1.tar.gz?id=h9vm02tm0erbaij7ctlmkorali&iid=LC81670562019137LGN00&did=515840583&ver=production
+
+
+get_earthexplorer <- function(){
+  # Fixme: how to keep auth session
+  # If you scan the result page for urls that say STANDARD you should get the file link
+  # 'https://earthexplorer.usgs.gov/download/external/options/LANDSAT_8_C1/LC81690562019135LGN00/INVSVC/'
+  
+  url <- 'https://earthexplorer.usgs.gov/download/12864/LC81690562019135LGN00/STANDARD/INVSVC'
+  outpath <- "LC81690562019135LGN00.tif"
+  
+  agent <- "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0"
+  
+  # Login to Earth Explorer, keep session cookie
+  s <- httr::GET("https://ers.cr.usgs.gov/login/", 
+                  httr::authenticate(USERNAME, PASSWORD)
+                 )
+  
+  # Then try to get the file, using the existing session
+  usgs <- httr::GET(url, httr::progress(), 
+                    httr::write_disk(outpath), 
+                    httr::set_cookies(unlist(cookies(s))),
+                    user_agent(agent)
+                    )
+  # https://dds.cr.usgs.gov/ltaauth/hsm/lsat1/collection01/oli_tirs/T1/2019/167/056/LC08_L1TP_167056_20190517_20190521_01_T1.tar.gz?id=h9vm02tm0erbaij7ctlmkorali&iid=LC81670562019137LGN00&did=515840583&ver=production
+  
+  se <- html_session("https://ers.cr.usgs.gov/login/", 
+                     httr::authenticate(USERNAME, PASSWORD),
+                     user_agent(agent)
+                     )
+  se <- se %>% jump_to(url, 
+                       httr::progress(),
+                       httr::write_disk(outpath)
+                       )
+  
+}
