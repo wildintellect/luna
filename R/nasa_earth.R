@@ -1,9 +1,14 @@
+# Authors: Alex Mandel, Aniruddha Ghosh, Robert J. Hijmans 
+# July 2019
+# Version 0.1
+# Licence GPL v3
+
 # Converted from the NASA official pyCMR
 # https://github.com/nasa/pyCMR
 
 #AUTH_HOST = 'urs.earthdata.nasa.gov'
 
-get_search_results <- function(url, limit, kwargs){
+.get_search_results <- function(url, limit, kwargs){
   #  Search the CMR granules
   #:param limit: limit of the number of results
   #:param kwargs: search parameters
@@ -27,6 +32,11 @@ get_search_results <- function(url, limit, kwargs){
     # Check for a valid response
     stop_for_status(response)
     
+    #unparsed_page = content(response,parsed="application/json")
+    # parsing without messages
+    # http://r.789695.n4.nabble.com/httr-content-without-message-td4747453.html
+    unparsed_page = content(response)
+
     
     if (http_type(response) == "text/csv"){
       
@@ -64,7 +74,7 @@ searchCollection <- function(cmr_host="https://cmr.earthdata.nasa.gov", limit=10
   # :param kwargs ...: search parameters
   # :return: dataframe of results
   SEARCH_COLLECTION_URL = paste0(cmr_host,"/search/collections")
-  results <- get_search_results(url=SEARCH_COLLECTION_URL, limit=limit, ...)
+  results <- .get_search_results(url=SEARCH_COLLECTION_URL, limit=limit, ...)
   return(results)
 }
 
@@ -89,40 +99,43 @@ simplify_urls <- function(response_table, sat){
   
 }
 
-.cmr_download_one <- function(url, outpath, USERNAME, PASSWORD, ...){
+
+.cmr_download_one <- function(url, path, USERNAME, PASSWORD, overwrite, ...){
   # Download a single result
   # TODO handle urls that don't require auth
   # TODO verify outdir exists if not make folder
   # TODO check if file exists
-  file <- httr::GET(url, httr::authenticate(USERNAME, PASSWORD), progress(), httr::write_disk(outpath))
   
-  return(file)
+  ofile <- paste0(path,basename(url))
+  if (!file.exists(ofile) | overwrite){
+    file <- GET(url, authenticate(USERNAME, PASSWORD), progress(), write_disk(ofile, overwrite = overwrite)) 
+  }
+
+  return(ofile)
 } 
 
-cmr_download <- function(urls, path, username=NULL, password=NULL, credentials){
+
+cmr_download <- function(urls, path, username=NULL, password=NULL, overwrite, ...){
   # Given a list of results, download all of them
   # TODO allow in parallel
   # TODO re-use a session
   
-  #dir.create(dirname(path), FALSE, TRUE)
-  # if (is.null(username)) {
-  #x <- readCreds(credentials)		
-  #usename = x$username
-  #password = x$password
-  #}
-  files <- rep("", length(url))
-	for (i in 1:length(urls)) {
-		x <- try( .cmr_download_one(urls[i], path, USERNAME= username, PASSWORD= password) )
-		if (class(x) == "try-error") {
-			warning("failure:", urls[i])
-		} else {
-			files[i] = x
-		}
-	}
-	return(files)
+  files <- rep("", length(urls))
+  for (i in 1:length(urls)) {
+    files <- tryCatch(.cmr_download_one(urls[i], path, 
+                                        USERNAME = username, PASSWORD = password,
+                                        overwrite = overwrite), 
+                      error = function(e){e})
+    if (inherits(files, "error")) {
+      warning("failure:", urls[i])
+    } else {
+      files[i] = urls[i]
+    }
+  }
+  return(files)
 }
 
-searchGranules <- function(product="MOD09A1", start_date, end_date, extent, limit=100, format="url", ...){
+searchGranules <- function(product="MOD09A1", start_date, end_date, extent, limit=100, datesuffix = "T00:00:00Z", ...){
   #Search the CMR granules
   #:param limit: limit of the number of results
   #:param kwargs: search parameters
@@ -130,11 +143,12 @@ searchGranules <- function(product="MOD09A1", start_date, end_date, extent, limi
   
   e <- as.vector(t(matrix(as.vector(extent), ncol=2)))
   e <- paste0(e, collapse=",")
-  start_date = as.Date(start_date)
-  end_date = as.Date(end_date)
   
-  
-  temporal= paste0(start_date, "T00:00:00Z,", end_date, "T00:00:00Z")
+  # for testing validity
+  start_date <- as.Date(start_date)
+  end_date <- as.Date(end_date)
+    
+  temporal <- paste0(start_date, datesuffix, ",", end_date, datesuffix)
   
   params <- list(
     short_name=product,	temporal=temporal,
@@ -149,6 +163,7 @@ searchGranules <- function(product="MOD09A1", start_date, end_date, extent, limi
   
   cmr_host="https://cmr.earthdata.nasa.gov"
   url <- paste0(cmr_host,"/search/granules")
+
   results <- get_search_results(url=url, limit=limit, kwargs=params)
   
   if (format == "url"){
