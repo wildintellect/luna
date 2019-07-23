@@ -95,6 +95,7 @@ simplify_urls <- function(response_table, sat){
     # Call functions from find_url.R to clean this up
   }
   
+  return(catcher)
 }
 
 

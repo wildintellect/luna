@@ -33,8 +33,9 @@ getModis <- function(product, start_date, end_date, aoi, download=FALSE, path,
 	cred <- getCredentials(url = "https://urs.earthdata.nasa.gov/users/new")
   
   # find product urls
-	fileurls <- searchGranules(product = product, start_date = start_date, end_date = end_date, extent = aoi, limit = limit)
-
+	results <- searchGranules(product = product, start_date = start_date, end_date = end_date, extent = aoi, limit = limit)
+	fileurls <- simplify_urls(results, "MODIS")
+	
   # TODO: need a better try-error message for the function
 	if ((length(fileurls) > 0) & download){
 		files <- cmr_download(urls = fileurls, path = path, 
@@ -50,9 +51,6 @@ getModis <- function(product, start_date, end_date, aoi, download=FALSE, path,
 }
 
 
-# TODO move to a generic function
-
-
-# include descripton of products from 
+# TODO: include descripton of products from 
 # url <- paste0("https://cmr.earthdata.nasa.gov/search/concepts/", pp$concept_id)
 # if (url == 1){browseURL(url)}
