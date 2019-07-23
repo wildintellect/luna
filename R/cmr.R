@@ -35,12 +35,11 @@
     #unparsed_page = content(response,parsed="application/json")
     # parsing without messages
     # http://r.789695.n4.nabble.com/httr-content-without-message-td4747453.html
-    unparsed_page = httr::content(response)
     
     if (http_type(response) == "text/csv"){
       
       # Per httr docs testing for expected type and parsing manually
-      unparsed_page = readr::read_csv(content(response, as="text"))
+      unparsed_page = readr::read_csv(httr::content(response, as="text"))
       
       # Check that the url column is not empty
       catcher <- tryCatch(urls <- unparsed_page$`Online Access URLs`,error=function(e){e})    
