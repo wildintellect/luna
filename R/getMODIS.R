@@ -30,7 +30,7 @@ getModis <- function(product, start_date, end_date, aoi, download=FALSE, path,
 		utils::flush.console()
 	}
   # set/check credentials
-	cred <- getCredentials(url = "https://urs.earthdata.nasa.gov/users/new")
+	cred <- getCredentials(id = "https://urs.earthdata.nasa.gov/users/new")
   
   # find product urls
 	results <- searchGranules(product = product, start_date = start_date, end_date = end_date, extent = aoi, limit = limit)
