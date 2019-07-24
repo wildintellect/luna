@@ -36,7 +36,7 @@
     # parsing without messages
     # http://r.789695.n4.nabble.com/httr-content-without-message-td4747453.html
     
-    if (http_type(response) == "text/csv"){
+    if (httr::http_type(response) == "text/csv"){
       
       # Per httr docs testing for expected type and parsing manually
       unparsed_page = readr::read_csv(httr::content(response, as="text"))
@@ -134,7 +134,7 @@ cmr_download <- function(urls, path, username=NULL, password=NULL, overwrite, ..
   return(files)
 }
 
-searchGranules <- function(product="MOD09A1", start_date, end_date, extent, limit=100, datesuffix = "T00:00:00Z", ...){
+searchGranules <- function(product="MOD09A1", start_date, end_date, extent, limit=100, datesuffix = "T00:00:00Z", format = "url", ...){
   #Search the CMR granules
   #:param limit: limit of the number of results
   #:param kwargs: search parameters
@@ -162,11 +162,11 @@ searchGranules <- function(product="MOD09A1", start_date, end_date, extent, limi
   cmr_host="https://cmr.earthdata.nasa.gov"
   url <- paste0(cmr_host,"/search/granules")
 
-  results <- get_search_results(url=url, limit=limit, kwargs=params)
+  results <- .get_search_results(url=url, limit=limit, kwargs=params)
   
   if (format == "url"){
     # if the user wants urls for immediate download
-    simplify_urls(results)
+    simplify_urls(results, sat="MODIS")
   } 
   
   return(results) 

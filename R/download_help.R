@@ -55,7 +55,12 @@
 	} else {
 		stopifnot(length(aoi) == 4)
 	}	
-	as.vector(t(matrix(aoi, ncol=2)))	
+	ve <- as.vector(t(matrix(aoi, ncol=2)))	
+	
+	# Many API require the extent formatted as a specific string
+	# Should we convert here or case by case?
+	se <- paste(ve, collapse = ",")
+	return(se)
 }
 
 
