@@ -9,11 +9,12 @@ Load complete product information in the corresponding product website. Opens th
 }
 
 \usage{
-productInfo(product)
+productInfo(product, ...)
 }
 
 \arguments{
   \item{product}{character}
+  \item{...}{Additional arguments}
 }
 
 \seealso{ \code{\link[luna]{getProducts}}}

@@ -10,7 +10,7 @@ The function returned is list of filenames that may have been downloaded.
 }
 
 \usage{
-getModis(product, start_date, end_date, aoi, download = FALSE, path, version="006", limit=100000, server="LP DAAC", ...)
+getLandsat(product="Landsat_8_OLI_TIRS_C1", start_date, end_date, aoi, download = FALSE, path="", version="1", limit=100000, server="AWS", overwrite=FALSE, ...)
 }
 
 \arguments{
@@ -23,6 +23,7 @@ getModis(product, start_date, end_date, aoi, download = FALSE, path, version="00
   \item{version}{character}
   \item{limit}{integer > 0}
   \item{server}{character}
+  \item{overwrite}{boolean}
   \item{...}{Additional arguments. These can be product specific. See Details)}
 }
 

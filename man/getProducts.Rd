@@ -9,11 +9,12 @@ Find available product names for download. See \code{\link{getModis}} for furthe
 }
 
 \usage{
-getProducts(product)
+getProducts(product, ...)
 }
 
 \arguments{
   \item{product}{character}
+  \item{...}{Additional arguments}
 }
 
 
